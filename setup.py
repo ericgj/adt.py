@@ -2,11 +2,11 @@ from setuptools import setup
 
 setup(
   name = "adt.py",
-  version = "0.0.1",
+  version = "0.0.2",
   author = "Eric Gjertsen",
   author_email = "ericgj72@gmail.com",
   description = (
-    "Tagged-union types with simple pattern matching, and immutable records (product types)"
+    "Tagged union types and immutable records (product types)"
   ),
   license = "MIT",
   keywords = "adt types immutable functional",
