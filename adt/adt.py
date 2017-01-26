@@ -41,7 +41,7 @@ Usage:
 
 
 """
-from f import curry_n
+from .f import curry_n
  
 def construct_type_instance(tag, specs, args):
   return construct_type(tag, specs)(*args)
