@@ -1,48 +1,6 @@
-"""
-Simple ADTs and tagged-union matching in Python,
-Plus immutable records (product types) 
-
-Tip of the hat to [union-type](https://github.com/paldelpind/union-type), a
-javascript library with similar aims and syntax.
-
-Usage:
-
-    Point = Type("Point", [int, int])
-    Rectangle = Type("Rectangle", [Point, Point])
-    Circle = Type("Circle", [int, Point])
-    Triangle = Type("Triangle", [Point, Point, int])
-    
-    Shape = [ Rectangle, Circle, Triangle ]
-    
-    area = match(Shape, {
-      Rectangle: (lambda (t,l), (b,r): (b - t) * (r - l)),
-      Circle: (lambda r, (x,y): math.pi * (r**2)),
-      Triangle: (lambda (x1,y1), (x2,y2), h: (((x2 - x1) + (y2 - y1)) * h)/2)
-    })
-    
-    rect = Rectangle( Point(0,0), Point(100,100) )
-    area(rect)  # => 10000
-    
-    circ = Circle( 5, Point(0,0) )
-    area(circ)  # => 78.539816...
-    
-    tri = Triangle( Point(0,0), Point(100,100), 5 )
-    area(tri)   # => 500
-
-
-   # Composing with records works transparently:
-
-   Point = Record("Point", {'x': int, 'y': int})
-   Rectangle = Type("Rectangle", [Point, Point])
-   
-   p1 = Point(x=1,y=2)
-   p2 = Point(x=4,y=6)
-   rect = Rectangle( p1, p2 )
-
-
-"""
 from .f import curry_n
  
+
 def construct_type_instance(tag, specs, args):
   return construct_type(tag, specs)(*args)
 
@@ -55,7 +13,9 @@ def construct_record_instance(tag, specs, attrs):
 def construct_record(tag, specs):
   return Record(tag,specs)
 
+
 def Type(tag, specs):
+
   class _tagged_tuple(tuple):
     def __eq__(self,other):
       return (
@@ -137,12 +97,12 @@ def Record(tag,specs):
   _record.__name__ = tag
 
   def _bind(**vals):
-    extras = [ ("'%s'" % k) for k in vals.keys() if not specs.has_key(k) ]
+    extras = [ ("'%s'" % k) for k in vals.keys() if not k in specs ]
     if len(extras) > 0:
       raise TypeError("%s: Unexpected values given: %s" % (tag, ", ".join(extras)))
 
     for (name,s) in specs.items():
-      if not vals.has_key(name):
+      if not name in vals:
         raise TypeError("%s: Expected value for '%s', none given" % (tag, name))
       ok, err = validate(s,vals[name])
       if not ok:
@@ -190,7 +150,12 @@ def validate(s,v):
       return (
         ( ( type(v) == s ) or
           ( hasattr(s,"__adt_class__") and isinstance(v,typeof(s)) ) or 
-          ( callable(s) and s(v) == True )
+          ( callable(s) and s(v) == True ) or
+          ( hasattr(s,'__iter__') and (
+            any( hasattr(si,"__adt_class__") and isinstance(v,typeof(si)) 
+                   for si in s ) 
+            )
+          )
         ), 
         None
       )
@@ -206,7 +171,7 @@ def match(adts, cases, target):
 
   missing = [
     t.__adt_class__.__name__ for t in adts \
-      if not (cases.has_key(type(None)) or cases.has_key(t))
+      if not (type(None) in cases) or (t in cases)
   ]
   assert len(missing) == 0, \
     "No case found for the following type(s): %s" % ", ".join(missing)
