@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
   name = "adt.py",
-  version = "0.0.5",
+  version = "0.0.6",
   author = "Eric Gjertsen",
   author_email = "ericgj72@gmail.com",
   description = (
