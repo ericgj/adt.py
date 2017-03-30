@@ -70,7 +70,7 @@ def Record(tag,specs):
         all([ 
           getattr(self,k) == getattr(other,k) 
             for k in self.__class__.__slots__ 
-        ])
+        ]) 
       )
      
     def __repr__(self):
@@ -92,7 +92,8 @@ def Record(tag,specs):
 
     def __init__(self,**vals):
       for (k,v) in vals.items():
-        setattr(self.__class__,k,v)
+        if k not in ['__eq__', '__repr__', '__reduce__', '__init__']:
+          setattr(self,k,v)
 
   _record.__name__ = tag
 
