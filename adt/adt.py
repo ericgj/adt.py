@@ -172,7 +172,7 @@ def match(adts, cases, target):
 
   missing = [
     t.__adt_class__.__name__ for t in adts \
-      if not (type(None) in cases) or (t in cases)
+      if not (type(None) in cases) and not (t in cases)
   ]
   assert len(missing) == 0, \
     "No case found for the following type(s): %s" % ", ".join(missing)
