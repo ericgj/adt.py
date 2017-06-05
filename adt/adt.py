@@ -167,7 +167,11 @@ def validate(s,v):
 @curry_n(3)  
 def match(adts, cases, target):
 
-  assert target.__class__ in [ typeof(adt) for adt in adts ],  \
+  # Sadly, we need to use name-based matching here, because identity of 
+  # dynamic classes across separate `import`s is not guaranteed in python, 
+  # apparently.
+
+  assert target.__class__.__name__ in [ typeof(adt).__name__ for adt in adts ],  \
     "%s is not in union" % target.__class__.__name__
 
   missing = [
@@ -183,7 +187,7 @@ def match(adts, cases, target):
     fn = ( 
       next( 
         cases[constr] for constr in cases \
-          if not constr == type(None) and isinstance(target,typeof(constr)) 
+          if not constr == type(None) and target.__class__.__name__ == typeof(constr).__name__ 
       )
     )
 
